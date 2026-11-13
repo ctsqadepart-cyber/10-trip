@@ -1,0 +1,14 @@
+const fs = require('node:fs');
+const vm = require('node:vm');
+const path = require('node:path');
+const source = process.argv[2];
+if (!source) throw new Error('Provide prototype fragment path');
+const html = fs.readFileSync(source, 'utf8');
+const script = html.match(/<script>([\s\S]*?)<\/script>/)[1];
+new vm.Script(script);
+const spec = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'android-design.json'), 'utf8'));
+if (spec.confirmedDecisions.backupEncryption !== 'none') throw new Error('Backup decision mismatch');
+if (spec.confirmedDecisions.memberManagers !== 'owner_only') throw new Error('Membership decision mismatch');
+if (/<(?:html|body|head)(?:\s|>)/i.test(html)) throw new Error('Expected HTML fragment');
+if (/\b(fetch|XMLHttpRequest|WebSocket|MediaRecorder|getUserMedia|geolocation)\b/.test(script)) throw new Error('Prototype must not access network or hardware');
+console.log(JSON.stringify({javascriptSyntax:'passed',designJson:'passed',confirmedDecisions:'passed',fragment:'passed',noNetworkOrHardwareApis:'passed',sizeBytes:Buffer.byteLength(html)},null,2));

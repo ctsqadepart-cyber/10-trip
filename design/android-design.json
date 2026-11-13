@@ -1,0 +1,123 @@
+{
+  "formatVersion": 1,
+  "designVersion": "0.1.0",
+  "language": "zh-TW",
+  "platform": "Android",
+  "workingName": "拾旅",
+  "nameStatus": "暫用名稱，尚未定案",
+  "scope": "第一階段介面與資料設計；不是可安裝的 Android App",
+  "confirmedDecisions": {
+    "diaryVisibility": "private_until_explicit_trip_share_confirmation",
+    "sharingIncludes": ["content", "location", "photos", "audio", "linked_expenses"],
+    "contentEditors": "all_trip_members",
+    "memberManagers": "owner_only",
+    "tripDeletion": "owner_only",
+    "recordingOnBackgroundOrLock": "stop_finalize_and_report",
+    "backupEncryption": "none",
+    "backupWarningRequired": true,
+    "contentSyncTrigger": "explicit_user_action_only",
+    "paidServiceActivation": "explicit_user_approval_required"
+  },
+  "visualTokens": {
+    "light": {
+      "background": "#FAF8F3",
+      "surface": "#FFFFFF",
+      "text": "#26382E",
+      "secondaryText": "#606B63",
+      "primary": "#365D46",
+      "onPrimary": "#FFFFFF",
+      "soft": "#E9EFDF",
+      "border": "#DCE2D8",
+      "privateBackground": "#F4E5D5",
+      "privateText": "#88552F",
+      "error": "#A83932"
+    },
+    "dark": {
+      "background": "#1E211E",
+      "surface": "#292D28",
+      "text": "#EDF1E7",
+      "secondaryText": "#B4BFB0",
+      "primary": "#BDD7AC",
+      "onPrimary": "#20351E",
+      "soft": "#354331",
+      "border": "#495045",
+      "privateBackground": "#49372B",
+      "privateText": "#F1C599",
+      "error": "#FFB4A9"
+    },
+    "nativeTypographySp": {"headline": 28, "section": 20, "body": 16, "supporting": 14, "label": 12},
+    "spacingDp": [4, 8, 12, 16, 24, 32],
+    "minimumTouchTargetDp": 48,
+    "cardRadiusDp": 20,
+    "controlRadiusDp": 14,
+    "fontScaling": "respect_system_font_scale",
+    "statusEncoding": "text_and_icon_never_color_only"
+  },
+  "navigation": {
+    "primary": ["trips", "diary", "quick_add", "settings"],
+    "tripTabs": ["records_by_local_date", "locations", "expenses"],
+    "quickAddDefault": "current_trip_when_in_trip_otherwise_diary",
+    "backDuringEditing": "retain_draft_then_return",
+    "primaryActions": "bottom_of_form_with_keyboard_insets_in_native_app"
+  },
+  "screens": [
+    {"id": "trips", "title": "我的旅程", "actions": ["create_trip", "open_trip", "quick_add", "open_diary"], "empty": "還沒有旅程，先記錄日常也可以。"},
+    {"id": "trip_records", "title": "旅程紀錄", "actions": ["select_local_date", "open_record", "add_record", "open_members"], "empty": "這一天，還沒有紀錄。"},
+    {"id": "diary", "title": "日常紀錄", "visibility": "private", "actions": ["add_record", "open_record", "share_to_trip"]},
+    {"id": "record_detail", "title": "紀錄內容", "actions": ["edit", "manage_photos", "manage_audio", "open_linked_expense", "delete_with_impact_confirmation"]},
+    {"id": "record_editor", "title": "記下這一刻", "required": ["at_least_one_meaningful_content"], "defaults": ["occurred_at_now"], "optional": ["title", "text", "location", "photos", "audio", "meals", "expenses"], "actions": ["save", "capture_photo", "pick_local_photo", "record_audio", "request_one_location", "add_expense"]},
+    {"id": "photos", "title": "照片", "actions": ["capture", "pick_multiple", "reorder", "edit_caption", "remove_app_copy"], "forbidden": ["delete_gallery_original"]},
+    {"id": "audio", "title": "語音筆記", "states": ["idle", "recording", "finalizing", "saved", "interrupted", "permission_denied", "failed"], "actions": ["record", "stop", "play", "rename", "delete"]},
+    {"id": "expenses", "title": "費用", "views": ["daily", "whole_trip", "category", "member_balance"]},
+    {"id": "expense_editor", "title": "這筆，怎麼分？", "fields": ["category", "original_amount", "currency", "rate_direction", "rate", "converted_amount", "payer", "participants", "split_mode", "shares"], "validation": ["positive_amount", "positive_rate", "at_least_one_participant", "sum_shares_equals_expense"]},
+    {"id": "share_preview", "title": "確認加入並分享", "mustShow": ["target_trip", "recipient_members", "included_content", "linked_expenses", "member_mapping", "currency_effect", "trip_total_before_after"], "consentRequired": true},
+    {"id": "members", "title": "一起旅行的人", "identity": "stable_local_member_id_independent_of_account", "adminRole": "owner_only"},
+    {"id": "settings", "title": "安心留在手邊", "phase2Preview": ["unencrypted_backup_warning", "restore_validation", "export_privacy_selection"]}
+  ],
+  "localDataDesign": {
+    "database": "Room_SQLite",
+    "attachmentStorage": "app_private_persistent_files_not_cache",
+    "draftStorage": "persistent_draft_distinct_from_saved_record",
+    "transactionBoundary": "record_children_links_and_outbox_are_atomic",
+    "identifiers": "UUID_generated_offline",
+    "entities": {
+      "Trip": ["id", "title", "startDate", "endDate", "settlementCurrency", "ownerMemberId"],
+      "Record": ["id", "privateOwnerId", "tripId_nullable", "occurredAt", "zoneId", "localDate", "title", "text", "placeName", "latitude_nullable", "longitude_nullable", "locationAccuracy_nullable", "locationCapturedAt_nullable", "locationSource"],
+      "Attachment": ["id", "recordId", "kind", "privateRelativePath", "sha256", "sizeBytes", "mimeType", "sortIndex", "captionOrName", "durationMs_nullable", "transferState"],
+      "Meal": ["id", "recordId", "storeName", "rating_nullable", "notes", "expenseId_nullable"],
+      "Dish": ["id", "mealId", "name", "quantityDecimal", "unitAmountMinor", "currency", "rating_nullable", "notes", "sortIndex"],
+      "Expense": ["id", "recordId_nullable", "tripId_nullable", "localDate", "category", "originalAmountMinor", "originalCurrency", "settlementCurrency", "rateDecimalString", "settledAmountMinor", "payerMemberId", "roundingPolicyVersion", "splitMode"],
+      "ExpenseShare": ["expenseId", "memberId", "settledAmountMinor", "stableRemainderOrder"],
+      "Member": ["id", "tripId_nullable", "displayName", "linkedAccountId_nullable", "active"],
+      "ExchangeRatePreset": ["id", "tripId_nullable", "sourceCurrency", "settlementCurrency", "rateDecimalString", "effectiveForNewExpenses"],
+      "OutboxOperation": ["operationId", "entityId", "aggregateId", "baseServerRevision_nullable", "localRevision", "payloadSnapshot", "status"],
+      "Conflict": ["id", "aggregateId", "baseSnapshot", "localSnapshot", "remoteSnapshot", "resolutionState"]
+    },
+    "syncMetadataForSyncableEntities": ["schemaVersion", "localRevision", "baseServerRevision_nullable", "changedByLocalActorId", "deviceId", "deletedFlag", "modifiedAt_display_only"],
+    "futureServerRules": ["revision_compare_and_swap", "operation_id_idempotency", "server_member_authorization_for_rows_and_files", "owner_only_membership_mutations", "manual_batch_only_no_realtime_subscription", "preserve_delete_edit_conflicts", "do_not_gc_conflict_attachments"],
+    "futureBackupRules": ["manifest_and_hashes", "format_version", "exclude_credentials_and_map_cache", "staging_validation_before_commit", "same_id_same_content_skip", "same_id_different_content_preserve_both", "restored_revision_not_automatically_server_authoritative"]
+  },
+  "moneyPolicy": {
+    "amountRepresentation": "integer_minor_units",
+    "rates": "exact_decimal_string",
+    "rounding": "HALF_UP_once_to_settlement_currency_minor_unit",
+    "splitOrder": "convert_total_then_split",
+    "equalSplitRemainder": "fixed_stable_member_order_not_display_sort",
+    "customSplitCurrency": "trip_settlement_currency",
+    "rateChangeDefault": "new_expenses_only",
+    "revalueExisting": "explicit_selection_and_impact_preview_then_confirm",
+    "currencyChangeWithExpenses": "dedicated_revaluation_flow",
+    "rating": {"minimum": 1, "maximum": 5, "step": 1, "unset": null}
+  },
+  "prototypeLimitations": [
+    "示範資料僅存在本次原型記憶體，重新載入會重設",
+    "沒有 Android 安裝檔、Room 資料庫或真實附件",
+    "不取得相機、麥克風或定位權限",
+    "播放與錄音僅為狀態示範，沒有音訊",
+    "照片使用明確標示的版面佔位圖",
+    "未呼叫地圖、搜尋、登入或雲端服務",
+    "刪除、建立旅程、備份、還原、匯出及餐點編輯僅展示流程或欄位",
+    "原型費用編輯只示範 JPY/TWD，正式幣別資料表尚未建立"
+  ],
+  "nativeAcceptanceStatus": "all_not_run"
+}

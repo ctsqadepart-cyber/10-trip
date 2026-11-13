@@ -1,0 +1,60 @@
+{
+  "version": "0.1.0-local",
+  "generatedAtTaipei": "2026-11-13 14:35:49",
+  "apk": {
+    "file": "shilu-0.1.0-local-debug.apk",
+    "bytes": 18536725,
+    "sha256": "9ec01d0469d8b0fcb7954f2ea94ea2acd88a9ae214635b460cabeb8ca8f03aa7",
+    "signing": "Android debug signing; not a production release",
+    "signatureVerified": true
+  },
+  "automated": {
+    "environment": "Windows JVM + Robolectric Android API 28; no connected phone",
+    "totalTests": 11,
+    "suites": [
+      {
+        "name": "tw.shilu.domain.MoneyTest",
+        "tests": 5,
+        "skipped": 0,
+        "failures": 0,
+        "timestamp": "2026-11-13T06:16:51"
+      },
+      {
+        "name": "tw.shilu.travel.ActivitySmokeTest",
+        "tests": 1,
+        "skipped": 0,
+        "failures": 0,
+        "timestamp": "2026-11-13T06:33:14"
+      },
+      {
+        "name": "tw.shilu.travel.RepositoryTest",
+        "tests": 5,
+        "skipped": 0,
+        "failures": 0,
+        "timestamp": "2026-11-13T06:33:24"
+      }
+    ],
+    "lintErrors": 0,
+    "lintWarnings": 20,
+    "internetPermission": false,
+    "declaredPermissions": [
+      "android.permission.CAMERA",
+      "android.permission.RECORD_AUDIO",
+      "android.permission.ACCESS_COARSE_LOCATION",
+      "android.permission.ACCESS_FINE_LOCATION",
+      "tw.shilu.travel.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+    ]
+  },
+  "deviceVerification": {
+    "model": "vivo V40",
+    "android": "16",
+    "status": "not_run",
+    "reason": "No Android device connected to ADB at verification time"
+  },
+  "manualChecklist": "quality/manual-acceptance.json",
+  "futureFeatures": [
+    "backup_restore_export",
+    "authentication_collaboration_sync",
+    "nearby_search_offline_maps"
+  ]
+}
