@@ -27,12 +27,14 @@
   const form = document.querySelector("#form");
   const fields = document.querySelector("#fields");
   const error = document.querySelector("#form-error");
+  const deleteDialog = document.querySelector("#delete-trip");
+  const deleteError = document.querySelector("#delete-error");
   let state = sample;
   let activeEditor;
   let statusTimeout;
 
   function includeJapanExample(saved) {
-    if (saved.trips.some(trip => trip.id === japan.trip.id)) return saved;
+    if (saved.japanExampleRemoved || saved.trips.some(trip => trip.id === japan.trip.id)) return saved;
     return {
       ...saved,
       trips: [...saved.trips, japan.trip],
@@ -59,6 +61,15 @@
     announce("無法讀取本機資料，已顯示範例。");
   }
   state = includeJapanExample(state);
+
+  function save(next) {
+    try {
+      localStorage.setItem(key, JSON.stringify(next));
+    } catch {
+      throw new Error("無法寫入瀏覽器儲存空間，請確認瀏覽器允許本機儲存。");
+    }
+    state = next;
+  }
 
   const escape = value => String(value).replace(/[&<>"']/g, character => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -144,7 +155,10 @@
     }
     if (trip) {
       main.innerHTML = `<a class="back" href="#trips">← 我的旅程</a>
-        ${heading(trip.title, [trip.date, trip.place].filter(Boolean).join(" · "), add("record", "＋ 新增旅程紀錄", trip.id))}
+        ${heading(trip.title, [trip.date, trip.place].filter(Boolean).join(" · "), `<div class="trip-actions">
+          ${add("record", "＋ 新增旅程紀錄", trip.id)}
+          <button type="button" class="secondary danger-outline" data-delete-trip="${escape(trip.id)}">刪除旅程</button>
+        </div>`)}
         <section><div class="section-head"><h2>沿途紀錄</h2></div>
         ${records(state.records.filter(record => record.trip === trip.id))}</section>${ledger(trip)}`;
     } else if (tab === "trips") {
@@ -161,7 +175,7 @@
         <p>旅行與日常筆記</p><h1>日子，都值得記下</h1>
         <p>收藏旅途風景，留下日常片刻，整理一起花的旅費。</p>
         <div class="hero-actions">
-          <a class="button" href="${tripLink(japan.trip.id)}">探索日本關西五日 →</a>
+          ${state.trips.some(item => item.id === japan.trip.id) ? `<a class="button" href="${tripLink(japan.trip.id)}">探索日本關西五日 →</a>` : ""}
           <a class="button" href="#trips">查看所有旅程</a>
         </div>
       </div></div>
@@ -219,6 +233,44 @@
   main.addEventListener("click", event => {
     const button = event.target.closest("[data-edit]");
     if (button) showEditor(button.dataset.edit, button.dataset.trip);
+    const deleteButton = event.target.closest("[data-delete-trip]");
+    if (!deleteButton) return;
+    const id = deleteButton.dataset.deleteTrip;
+    const recordCount = state.records.filter(record => record.trip === id).length;
+    const expenseCount = state.expenses.filter(expense => expense.trip === id).length;
+    deleteDialog.dataset.trip = id;
+    document.querySelector("#delete-description").textContent =
+      `刪除「${tripName(id)}」會一併移除 ${recordCount} 則旅程紀錄和 ${expenseCount} 筆支出。刪除後無法復原。`;
+    deleteError.textContent = "";
+    deleteDialog.showModal();
+  });
+  deleteDialog.addEventListener("click", event => {
+    if (event.target.closest("[data-close]")) deleteDialog.close();
+  });
+  document.querySelector("#delete-form").addEventListener("submit", event => {
+    event.preventDefault();
+    const id = deleteDialog.dataset.trip;
+    if (!state.trips.some(trip => trip.id === id)) return;
+    const next = {
+      ...state,
+      trips: state.trips.filter(trip => trip.id !== id),
+      records: state.records.filter(record => record.trip !== id),
+      expenses: state.expenses.filter(expense => expense.trip !== id),
+    };
+    if (id === japan.trip.id) next.japanExampleRemoved = true;
+    try {
+      save(next);
+    } catch (problem) {
+      deleteError.textContent = problem.message;
+      return;
+    }
+    deleteDialog.close();
+    if (location.hash === tripLink(id)) history.replaceState(null, "", "#trips");
+    render();
+    const heading = main.querySelector("h1");
+    heading.setAttribute("tabindex", "-1");
+    heading.focus();
+    announce("已刪除旅程");
   });
   dialog.addEventListener("click", event => {
     if (event.target.closest("[data-close]")) dialog.close();
@@ -246,12 +298,7 @@
       if (type === "trip") next.trips = [...state.trips, { ...base, place: data.get("place").trim(), date: data.get("date") }];
       if (type === "record") next.records = [{ ...base, trip, date: data.get("date"), note: data.get("note").trim() }, ...state.records];
       if (type === "expense") next.expenses = [buildExpense(data, { ...base, trip }), ...state.expenses];
-      try {
-        localStorage.setItem(key, JSON.stringify(next));
-      } catch {
-        throw new Error("無法寫入瀏覽器儲存空間，請確認瀏覽器允許本機儲存。");
-      }
-      state = next;
+      save(next);
       dialog.close();
       if (type === "trip") location.hash = tripLink(id);
       else if (type === "record" && !trip) location.hash = "#diary";

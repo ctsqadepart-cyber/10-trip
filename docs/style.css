@@ -55,3 +55,10 @@ textarea{resize:vertical}
 @media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#1e241f;--paper:#252e27;--ink:#edf4ea;--muted:#bdc9be;--green:#bfdabb;--soft:#344638;--line:#455547}button,.button,#status:not(:empty),.brand-mark{color:#213624}.hero .button{color:#234932}}
 
 .trip-title{margin-top:12px}
+
+.trip-actions{display:flex;gap:8px;flex-wrap:wrap}
+.danger-outline{color:#9f332e}
+.danger{background:#9f332e;color:#fff}
+#delete-description{margin-top:12px;line-height:1.65;overflow-wrap:anywhere}
+#delete-error:not(:empty){margin-top:12px;color:#9f332e}
+@media(prefers-color-scheme:dark){.danger-outline,#delete-error:not(:empty){color:#ffb4a9}}

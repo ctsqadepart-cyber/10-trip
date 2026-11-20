@@ -28,6 +28,17 @@
       <div class="form-actions"><button type="button" class="secondary" data-close>取消</button><button type="submit">儲存</button></div>
     </form>
   </dialog>
+  <dialog id="delete-trip" aria-labelledby="delete-title" aria-describedby="delete-description">
+    <form id="delete-form">
+      <h2 id="delete-title">刪除旅程</h2>
+      <p id="delete-description"></p>
+      <p id="delete-error" role="alert"></p>
+      <div class="form-actions">
+        <button type="button" class="secondary" data-close autofocus>取消</button>
+        <button type="submit" class="danger">確認刪除</button>
+      </div>
+    </form>
+  </dialog>
   <p id="status" role="status"></p>
 </body>
 </html>
