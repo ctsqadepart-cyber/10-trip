@@ -3,6 +3,20 @@
 
   const key = "shilu.web.v1";
   const members = ["你", "小禾", "阿岑"];
+  const japan = {
+    trip: { id: "sample-japan-kansai", title: "日本關西五日", place: "大阪・京都・奈良", date: "2026-11-09" },
+    records: [
+      { id: "sample-kansai-d1", title: "第 1 天｜抵達大阪", date: "2026-11-09", note: "從關西機場搭南海電鐵到難波。放好行李後逛道頓堀，晚餐吃章魚燒和大阪燒。" },
+      { id: "sample-kansai-d2", title: "第 2 天｜大阪城與中之島", date: "2026-11-10", note: "早上逛大阪城公園，午後到中之島沿河散步。晚上回難波找居酒屋用餐。" },
+      { id: "sample-kansai-d3", title: "第 3 天｜京都伏見與東山", date: "2026-11-11", note: "早上搭車到伏見稻荷大社，沿千本鳥居走一段。午後到清水寺，再沿二年坂、三年坂走往祇園。" },
+      { id: "sample-kansai-d4", title: "第 4 天｜奈良公園與町屋", date: "2026-11-12", note: "從大阪難波搭近鐵到奈良，走訪奈良公園與東大寺。下午逛奈良町，傍晚回大阪。" },
+      { id: "sample-kansai-d5", title: "第 5 天｜黑門市場與返程", date: "2026-11-13", note: "退房後去黑門市場吃早餐，回飯店取行李，再從難波搭車前往關西機場。" },
+    ].map(record => ({ ...record, trip: "sample-japan-kansai" })),
+    expenses: [
+      { id: "sample-kansai-train", title: "關西機場到難波車票", payer: "你", original: "2910", total: "62565", shares: { "你": "20855", "小禾": "20855", "阿岑": "20855" } },
+      { id: "sample-kansai-dinner", title: "難波居酒屋晚餐", payer: "小禾", original: "4650", total: "99975", shares: { "你": "32250", "小禾": "35475", "阿岑": "32250" } },
+    ].map(expense => ({ ...expense, trip: "sample-japan-kansai", currency: "JPY" })),
+  };
   const sample = {
     trips: [{ id: "lake", title: "南投・湖畔兩日", place: "日月潭，南投", date: "2026-11-14" }],
     records: [{ id: "sample", trip: "lake", title: "清晨的湖岸", date: "2026-11-14", note: "沿著湖岸慢慢走，霧散開後，看見山色倒映在水面。" }],
@@ -16,6 +30,16 @@
   let state = sample;
   let activeEditor;
   let statusTimeout;
+
+  function includeJapanExample(saved) {
+    if (saved.trips.some(trip => trip.id === japan.trip.id)) return saved;
+    return {
+      ...saved,
+      trips: [...saved.trips, japan.trip],
+      records: [...saved.records, ...japan.records],
+      expenses: [...saved.expenses, ...japan.expenses],
+    };
+  }
 
   function announce(message) {
     const status = document.querySelector("#status");
@@ -34,6 +58,7 @@
   } catch {
     announce("無法讀取本機資料，已顯示範例。");
   }
+  state = includeJapanExample(state);
 
   const escape = value => String(value).replace(/[&<>"']/g, character => ({
     "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
@@ -135,7 +160,10 @@
       main.innerHTML = `<div class="hero"><div class="hero-content">
         <p>旅行與日常筆記</p><h1>日子，都值得記下</h1>
         <p>收藏旅途風景，留下日常片刻，整理一起花的旅費。</p>
-        <a class="button" href="${state.trips.length ? tripLink(state.trips[0].id) : "#trips"}">探索範例旅程 →</a>
+        <div class="hero-actions">
+          <a class="button" href="${tripLink(japan.trip.id)}">探索日本關西五日 →</a>
+          <a class="button" href="#trips">查看所有旅程</a>
+        </div>
       </div></div>
       <section><div class="section-head"><h2>我的旅程</h2>${add("trip", "＋ 建立旅程")}</div>${tripCards(state.trips.slice(0, 3))}</section>
       <section><div class="section-head"><h2>最近紀錄</h2>${add("record", "＋ 隨手記")}</div>${records(state.records.slice(0, 3))}</section>`;

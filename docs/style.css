@@ -27,7 +27,9 @@ h3{font-size:1.1rem}
 .hero-content{max-width:590px}
 .hero h1{font-family:"Noto Serif TC","Songti TC",serif;font-size:clamp(2rem,5vw,3.6rem);line-height:1.16;margin:8px 0 12px}
 .hero p{line-height:1.65}
-.hero .button{margin-top:22px;background:#f0f5e9;color:#234932}
+.hero-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.hero .button{background:#f0f5e9;color:#234932}
+.hero .button + .button{background:#16382edb;color:white;border-color:#ffffff80}
 section{margin-top:29px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,245px),1fr));gap:14px}
 .card,.entry,.empty{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px;min-width:0;overflow-wrap:anywhere}
